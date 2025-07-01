@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GitHub Activity Viewer</title>
+</head>
+<body>
+  <h2>Recent GitHub Events</h2>
+  <ul id="events"></ul>
+
+  <script>
+    async function fetchEvents() {
+      const res = await fetch("/get-events");
+      const json = await res.json();
+      const events = json.data;
+
+      const html = events.map(event => {
+        const time = new Date(event.timestamp).toUTCString();
+        if (event.type === "push") {
+          return `<li>${event.author} pushed to ${event.to_branch} on ${time}</li>`;
+        } else if (event.type === "pull_request") {
+          return `<li>${event.author} submitted a pull request from ${event.from_branch} to ${event.to_branch} on ${time}</li>`;
+        } else if (event.type === "merge") {
+          return `<li>${event.author} merged branch ${event.from_branch} to ${event.to_branch} on ${time}</li>`;
+        }
+      }).join('');
+
+      document.getElementById("events").innerHTML = html;
+    }
+
+    fetchEvents();
+    setInterval(fetchEvents, 15000);
+  </script>
+</body>
+</html>
